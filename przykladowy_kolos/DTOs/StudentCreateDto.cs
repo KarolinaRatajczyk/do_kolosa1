@@ -12,4 +12,6 @@ public class StudentCreateDto
     
     [Range(0, short.MaxValue)]
     public required short Age { get; set; }
+    
+    public List<int>? GroupAssignments { get; set; }
 }
