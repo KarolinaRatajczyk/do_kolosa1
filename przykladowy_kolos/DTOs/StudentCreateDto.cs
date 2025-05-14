@@ -15,3 +15,6 @@ public class StudentCreateDto
     
     public List<int>? GroupAssignments { get; set; }
 }
+
+
+//id nie dodajemy, serwer tworzy
