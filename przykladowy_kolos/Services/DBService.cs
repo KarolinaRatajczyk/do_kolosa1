@@ -28,6 +28,7 @@ public class DbService(IConfiguration conf) : IDbService
     public async Task<IEnumerable<StudentDetailsGetDto>> GetStudentDetailsAsync(string? searchName)
     {
         var studentsDict = new Dictionary<int, StudentDetailsGetDto>();
+        //zapobiega duplikatom
         
         await using var connection = await GetConnectionAsync();
         
@@ -161,4 +162,93 @@ public class DbService(IConfiguration conf) : IDbService
     }
 }
 
+// TEMPLATE
+// public interface ICourseService
+// {
+//     Task<IEnumerable<CourseDetailsDto>> GetCoursesAsync(string? searchTitle);
+//     Task<CourseDetailsDto> CreateCourseAsync(CourseCreateDto courseData);
+// }
 
+// using Microsoft.Data.SqlClient;
+// using System.Data;
+// using przykladowy_kolos.DTOs;
+//
+// namespace przykladowy_kolos.Services;
+//
+// public class CourseService(IConfiguration config) : ICourseService
+// {
+//     private async Task<SqlConnection> GetConnectionAsync()
+//     {
+//         var connection = new SqlConnection(config.GetConnectionString("Default-db"));
+//         if (connection.State != ConnectionState.Open)
+//         {
+//             await connection.OpenAsync();
+//         }
+//         return connection;
+//     }
+//
+//     public async Task<IEnumerable<CourseDetailsDto>> GetCoursesAsync(string? searchTitle)
+//     {
+//         var courses = new List<CourseDetailsDto>();
+//
+//         await using var connection = await GetConnectionAsync();
+//
+//         var sql = """
+//                   SELECT Id, Title, Credits
+//                   FROM Course
+//                   WHERE @SearchTitle IS NULL OR Title LIKE '%' + @SearchTitle + '%';
+//                   """;
+//
+//         await using var command = new SqlCommand(sql, connection);
+//         command.Parameters.AddWithValue("@SearchTitle", searchTitle ?? (object)DBNull.Value);
+//
+//         await using var reader = await command.ExecuteReaderAsync();
+//
+//         while (await reader.ReadAsync())
+//         {
+//             courses.Add(new CourseDetailsDto
+//             {
+//                 Id = reader.GetInt32(0),
+//                 Title = reader.GetString(1),
+//                 Credits = reader.GetInt32(2)
+//             });
+//         }
+//
+//         return courses;
+//     }
+//
+//     public async Task<CourseDetailsDto> CreateCourseAsync(CourseCreateDto courseData)
+//     {
+//         await using var connection = await GetConnectionAsync();
+//         await using var transaction = await connection.BeginTransactionAsync();
+//
+//         try
+//         {
+//             var sql = """
+//                       INSERT INTO Course (Title, Credits)
+//                       OUTPUT INSERTED.Id
+//                       VALUES (@Title, @Credits);
+//                       """;
+//
+//             await using var command = new SqlCommand(sql, connection, (SqlTransaction)transaction);
+//             command.Parameters.AddWithValue("@Title", courseData.Title);
+//             command.Parameters.AddWithValue("@Credits", courseData.Credits);
+//
+//             var newCourseId = Convert.ToInt32(await command.ExecuteScalarAsync());
+//
+//             await transaction.CommitAsync();
+//
+//             return new CourseDetailsDto
+//             {
+//                 Id = newCourseId,
+//                 Title = courseData.Title,
+//                 Credits = courseData.Credits
+//             };
+//         }
+//         catch
+//         {
+//             await transaction.RollbackAsync();
+//             throw;
+//         }
+//     }
+// }
